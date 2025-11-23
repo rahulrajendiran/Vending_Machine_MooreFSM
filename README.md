@@ -1,7 +1,7 @@
 
 # Vending Machine Controller – Moore FSM (One-Hot Encoding)
 
-![Block Diagram](./docs/images/block_diagram.png)
+![Block Diagram](./Vending_Machine.png)
 
 ![Badge Verilog](https://img.shields.io/badge/HDL-Verilog-blue)
 ![Badge Vivado](https://img.shields.io/badge/Tool-Xilinx%20Vivado-orange)
@@ -52,7 +52,7 @@ The project is fully verified using **Vivado (XSIM)** with a custom **testbench*
 ## 🧩 Architecture Diagram
 Below is the block diagram representing the overall system architecture:
 
-![Diagram](./docs/images/block_diagram.png)
+![Diagram](./Vending_Machine.png)
 
 ---
 
@@ -113,13 +113,9 @@ The testbench performs:
 ## 📂 Repository Structure
 ```
 Vending_Machine_MooreFSM/
-│── rtl/
-│   └── vending_machine_moore_enhanced.v
-│── tb/
-│   └── tb_vending_machine_moore_enhanced.v
-│── docs/
-│   └── images/
-│       └── block_diagram.png
+│── vending_mach_fsm.v
+│── Vendirng_Machine.png
+│  
 │── README.md
 ```
 
