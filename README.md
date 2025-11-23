@@ -52,7 +52,7 @@ The project is fully verified using **Vivado (XSIM)** with a custom **testbench*
 ## 🧩 Architecture Diagram
 Below is the block diagram representing the overall system architecture:
 
-![Diagram](./Vending_Machine.png)
+![Diagram](./RTL.png)
 
 ---
 
