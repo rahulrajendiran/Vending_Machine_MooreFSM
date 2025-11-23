@@ -1,114 +1,156 @@
-#Overview
 
-This project implements a hardware-accurate vending machine controller in Verilog suitable for FPGA implementation. It models realistic system requirements (debouncing, invalid-coin detection, change calculation, cancel/refund, timeout reset) and is verified using a comprehensive testbench in Vivado (XSIM) or ModelSim.
+# Vending Machine Controller – Moore FSM (One-Hot Encoding)
 
-#Key goals
+![Block Diagram](./docs/images/block_diagram.png)
 
-Accurate finite-state modeling using a Moore FSM with one-hot state encoding (good for FPGA timing and clarity).
+![Badge Verilog](https://img.shields.io/badge/HDL-Verilog-blue)
+![Badge Vivado](https://img.shields.io/badge/Tool-Xilinx%20Vivado-orange)
+![Badge FSM](https://img.shields.io/badge/FSM-Moore%20Machine-green)
+![Badge Encoding](https://img.shields.io/badge/Encoding-OneHot-blueviolet)
+![Badge License](https://img.shields.io/badge/License-MIT-yellow)
 
-Realistic input handling (debounce + stable sampling).
+---
 
-Clean, synchronous outputs (glitch-free behavior).
+## 📑 Table of Contents
+- [Project Overview](#project-overview)
+- [Key Features](#key-features)
+- [Architecture Diagram](#architecture-diagram)
+- [FSM State Encoding](#fsm-state-encoding)
+- [Module Interface](#module-interface)
+- [Simulation and Verification](#simulation-and-verification)
+- [Waveform Expectations](#waveform-expectations)
+- [Repository Structure](#repository-structure)
+- [How to Run Simulation](#how-to-run-simulation)
+- [Future Improvements](#future-improvements)
+- [License](#license)
+- [Author](#author)
 
-Easy configuration via product_price.
+---
 
-Comprehensive verification (waveforms + stimulus vectors).
+## 🔍 Project Overview
+This repository contains a feature-rich **Vending Machine Controller** implemented in **Verilog** using a **Moore Finite State Machine (FSM)** with **One-Hot Encoding**. 
+The design simulates a realistic vending workflow including coin recognition, debouncing, invalid input detection, change dispensing, timeout reset, dynamic pricing, and glitch-free synchronous outputs.
 
-#Features
+The project is fully verified using **Vivado (XSIM)** with a custom **testbench**, waveform-driven debugging, and multiple edge-case simulations.
 
-One-Hot Moore FSM states: Sin, S10, S20, S30, S40, S50, S60, S70, S80.
+---
 
-Accepts coins: 10, 20, 50 (encoded as 2'b00, 2'b01, 2'b10). 2'b11 used as idle/invalid.
+## ⚡ Key Features
+- Moore FSM with **One-Hot State Encoding**
+- Coin inputs: **10, 20, 50 rupees**
+- **Debounce filtering** for stable input detection
+- **Invalid coin detection**
+- **Dynamic product price** (`product_price`)
+- Automatic **change calculation**
+- **Cancel/Refund** functionality
+- **Timeout auto-reset**
+- Fully synchronous, glitch-free outputs
+- Comprehensive **testbench** included
 
-Debounce logic — coin accepted only after N stable cycles (configurable).
+---
 
-Invalid coin detection (invalid_coin pulse).
+## 🧩 Architecture Diagram
+Below is the block diagram representing the overall system architecture:
 
-Dynamic product_price input (7-bit).
+![Diagram](./docs/images/block_diagram.png)
 
-Z (dispense) pulse and change_given with change_amount output.
+---
 
-Cancel/refund button returns current balance.
+## 🔢 FSM State Encoding
+| State | One-Hot | Balance |
+|-------|---------|---------|
+| Sin   | 000000001 | 0 |
+| S10   | 000000010 | 10 |
+| S20   | 000000100 | 20 |
+| S30   | 000001000 | 30 |
+| S40   | 000010000 | 40 |
+| S50   | 000100000 | 50 |
+| S60   | 001000000 | 60 |
+| S70   | 010000000 | 70 |
+| S80   | 100000000 | 80 |
 
-Timeout auto-reset clears balance after inactivity.
+---
 
-Testbench exercises edge cases: bounce/noise, invalid coins, timeout, cancel, overpayment.
+## 🧪 Module Interface
+```
+input  wire clk
+input  wire reset
+input  wire [1:0] coin
+input  wire [6:0] product_price
+input  wire cancel
 
-#Debounce & Stability
+output reg Z
+output reg change_given
+output reg [6:0] change_amount
+output reg [6:0] balance_out
+output reg invalid_coin
+```
 
-A small counter requires the coin input to remain stable for STABLE_THRESHOLD cycles before it is latched and processed. This prevents bounces and transient misreads.
+---
 
-Idle/invalid is represented by 2'b11. The design differentiates between idle and invalid via the invalid_coin pulse when a truly invalid code is latched.
+## 🧉 Simulation and Verification
+The testbench performs:
+- Exact payment testing  
+- Overpayment calculation  
+- Invalid coin handling  
+- Timeout reset  
+- Debounce rejection tests  
+- Cancel/Refund behavior  
+- Multi-cycle transaction sequences  
+- Custom waveform analysis  
 
-#How to Simulate
-Using Vivado GUI (recommended)
+---
 
-Create a project and add rtl/ and tb/ files.
+## 📈 Waveform Expectations
+- `Z` pulses exactly on dispense  
+- `change_amount` and `change_given` valid when balance ≥ price  
+- `invalid_coin` pulses only for illegal patterns  
+- Debounce ensures coin accepted only after ≥3 stable cycles  
+- `balance_out` increments by 10/20/50 and resets accordingly  
 
-Open Flow → Run Simulation → Run Behavioral Simulation.
+---
 
-Add signals to waveform (clk, reset, coin, product_price, cancel, Z, change_given, change_amount, balance_out, invalid_coin, state).
+## 📂 Repository Structure
+```
+Vending_Machine_MooreFSM/
+│── rtl/
+│   └── vending_machine_moore_enhanced.v
+│── tb/
+│   └── tb_vending_machine_moore_enhanced.v
+│── docs/
+│   └── images/
+│       └── block_diagram.png
+│── README.md
+```
 
-#Example sequences
+---
 
-Exact pay: 10 → 20 → 10 → expect Z=1, change_given=0
+## ▶️ How to Run Simulation
 
-Overpay single: 50 → expect Z=1, change_amount=10
+### Using Vivado
+1. Open Vivado → Run Simulation → Run Behavioral Simulation  
+2. Add all signals to waveform  
+3. Run simulation  
 
-Overpay multi: 50 → 10 → expect Z=1, change_amount=20
 
-Cancel: 10 → 20 → cancel → expect change_amount=30 and balance cleared
+---
 
-Invalid coin: 11 for ≥ stable cycles → invalid_coin=1, no balance change
+## 🚀 Future Improvements
+- Add Mealy FSM fast-response version  
+- Add coin-return actuator output  
+- Add 7-segment / LCD display driver  
+- Port to physical FPGA board (Basys3, Nexys A7)  
+- Add UART logging  
+- Add formal verification  
 
-#Waveform Checks (what to inspect)
+---
 
-Z must be a single-cycle pulse aligned to clk (dispense).
+## 📄 License
+This project is licensed under the **MIT License**.
 
-change_given and change_amount valid when Z occurs or immediately after (synchronous).
+---
 
-balance_out increments by 10/20/50 only after the debounce window and then clears after dispense or cancel.
-
-invalid_coin must pulse only on invalid encoding.
-
-No combinational glitches on outputs (all outputs change on clk edges).
-
-#Verification Coverage
-
-The provided testbench exercises:
-
-Exact payment, overpayment, multi-coin payments
-
-Invalid coin detection
-
-Debounce rejection (short pulses)
-
-Cancel/refund
-
-Timeout reset
-
-Variable product_price scenarios
-
-Add more directed randomized stimuli for extended coverage (recommended for formal verification).
-
-#Porting to FPGA / Synthesis Notes
-
-One-hot encoding is FPGA-friendly but consumes more flip-flops (tradeoff: simpler logic & timing).
-
-All outputs are synchronous — safe for synthesis.
-
-If implementing on board: add a hardware debouncer for coin sensor or tune STABLE_THRESHOLD for the board clock and sensor characteristics.
-
-For real coin-return mechanisms, integrate with actuator drivers and coin dispensing hardware with safety interlocks.
-
-#Future Work / Extensions
-
-Support more denominations (include coin return mechanism control).
-
-Add an MCP3008/ADC or sensor interface to read coin sensor analog signals directly.
-
-Add secure payment gateway integration (NFC/RFID) alongside coin acceptor.
-
-Replace Moore with Mealy where lower latency is needed.
-
-Add hardware-in-loop testing on an FPGA board with real sensors and actuators.
+## 👤 Author
+Your Name  
+LinkedIn: *https://www.linkedin.com/in/rahulrajendiran?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app*  
+GitHub: *https://github.com/rahulrajendiran*
