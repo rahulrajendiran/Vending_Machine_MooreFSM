@@ -148,5 +148,5 @@ This project is licensed under the **MIT License**.
 
 ## 👤 Author
 Rahul Rajendiran 
-LinkedIn: *https://www.linkedin.com/in/rahulrajendiran?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app*  
+ LinkedIn: *https://www.linkedin.com/in/rahulrajendiran?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app*  
 GitHub: *https://github.com/rahulrajendiran*
